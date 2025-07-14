@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Brief is Ready!</title>
+  <style>
+    body {
+      font-family: 'Open Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f9f9fb;
+      margin: 0;
+      text-align: center;
+    }
+    .container {
+      background: #fff;
+      padding: 2em 3em;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: #222;
+    }
+    p {
+      font-size: 1rem;
+      color: #555;
+      margin: 1em 0;
+    }
+    a.download-btn {
+      display: inline-block;
+      padding: 0.8em 1.6em;
+      background: #0070f3;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    a.download-btn:hover {
+      background: #005ac1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎉 Your Client Brief is Ready!</h1>
+    <p>Click the button below to download your brief:</p>
+    <a id="download" class="download-btn" href="#">Download Brief</a>
+  </div>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const fileUrl = urlParams.get('url');
+    if (fileUrl) {
+      const link = document.getElementById('download');
+      link.href = fileUrl;
+      link.setAttribute('download', 'ClientBrief.pdf');
+    } else {
+      document.querySelector('.container').innerHTML = "<p>❌ Missing download link.</p>";
+    }
+  </script>
+</body>
+</html>
