@@ -1,11 +1,12 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BriefGenie – Project Brief</title>
+  <title>BriefGenie – Project Brief (Debug Mode)</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 p-6">
@@ -21,6 +22,7 @@
     </div>
 
     <div id="briefContainer" class="space-y-4"></div>
+    <p id="errorMsg" class="text-sm text-red-600"></p>
 
     <p class="text-sm text-gray-500 text-right">Crafted with clarity by BriefGenie</p>
   </div>
@@ -37,20 +39,34 @@
 
     const decodeBase64 = (str) => {
       try {
-        return JSON.parse(atob(decodeURIComponent(str)));
+        const decoded = decodeURIComponent(str);
+        const parsed = JSON.parse(atob(decoded));
+        console.log("Decoded brief data:", parsed);
+        return parsed;
       } catch (e) {
+        console.error("Error decoding base64 brief:", e);
+        document.getElementById("errorMsg").textContent = "⚠️ Failed to decode the brief. Please check the link or try again.";
         return null;
       }
     };
 
     const encodeBase64 = (obj) => {
-      return encodeURIComponent(btoa(JSON.stringify(obj)));
+      try {
+        return encodeURIComponent(btoa(JSON.stringify(obj)));
+      } catch (e) {
+        console.error("Error encoding brief:", e);
+        return "";
+      }
     };
 
     const getBriefData = () => {
       const params = new URLSearchParams(window.location.search);
       const dataParam = params.get('data');
-      return dataParam ? decodeBase64(dataParam) : {};
+      if (!dataParam) {
+        document.getElementById("errorMsg").textContent = "⚠️ No brief data found in the link.";
+        return null;
+      }
+      return decodeBase64(dataParam);
     };
 
     const createSection = (key, value) => {
@@ -73,6 +89,8 @@
 
     const populateBrief = () => {
       const data = getBriefData();
+      if (!data) return;
+
       const container = document.getElementById('briefContainer');
       Object.keys(briefFields).forEach(key => {
         container.appendChild(createSection(key, data[key]));
