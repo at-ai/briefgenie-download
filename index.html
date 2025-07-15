@@ -1,68 +1,116 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Your Brief is Ready!</title>
-  <style>
-    body {
-      font-family: 'Open Sans', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #f9f9fb;
-      margin: 0;
-      text-align: center;
-    }
-    .container {
-      background: #fff;
-      padding: 2em 3em;
-      border-radius: 16px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.06);
-    }
-    h1 {
-      font-size: 1.8rem;
-      color: #222;
-    }
-    p {
-      font-size: 1rem;
-      color: #555;
-      margin: 1em 0;
-    }
-    a.download-btn {
-      display: inline-block;
-      padding: 0.8em 1.6em;
-      background: #0070f3;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 10px;
-      font-weight: bold;
-      transition: background 0.3s ease;
-    }
-    a.download-btn:hover {
-      background: #005ac1;
-    }
-  </style>
+  <title>BriefGenie – Project Brief</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>🎉 Your Client Brief is Ready!</h1>
-    <p>Click the button below to download your brief:</p>
-    <a id="download" class="download-btn" href="#">Download Brief</a>
+<body class="bg-gray-50 font-sans text-gray-800 p-6">
+
+  <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8 space-y-6">
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Your Project Brief</h1>
+      <div class="space-x-2">
+        <button id="copyAll" class="px-4 py-1.5 text-sm rounded-full bg-black text-white hover:bg-gray-800 transition">Copy Full Brief</button>
+        <button id="downloadPDF" class="px-4 py-1.5 text-sm rounded-full bg-black text-white hover:bg-gray-800 transition">Download PDF</button>
+        <button id="shareLink" class="px-4 py-1.5 text-sm rounded-full bg-black text-white hover:bg-gray-800 transition">Share Link</button>
+      </div>
+    </div>
+
+    <div id="briefContainer" class="space-y-4"></div>
+
+    <p class="text-sm text-gray-500 text-right">Crafted with clarity by BriefGenie</p>
   </div>
+
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const fileUrl = urlParams.get('url');
-    if (fileUrl) {
-      const link = document.getElementById('download');
-      link.href = fileUrl;
-      link.setAttribute('download', 'ClientBrief.pdf');
-    } else {
-      document.querySelector('.container').innerHTML = "<p>❌ Missing download link.</p>";
-    }
+    const briefFields = {
+      "Goals": "Goals",
+      "Target Audience": "Target Audience",
+      "Deliverables": "Deliverables",
+      "Timeline": "Timeline",
+      "Tone & Style": "Tone & Style",
+      "Notes": "Notes or Constraints"
+    };
+
+    const decodeBase64 = (str) => {
+      try {
+        return JSON.parse(atob(decodeURIComponent(str)));
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const encodeBase64 = (obj) => {
+      return encodeURIComponent(btoa(JSON.stringify(obj)));
+    };
+
+    const getBriefData = () => {
+      const params = new URLSearchParams(window.location.search);
+      const dataParam = params.get('data');
+      return dataParam ? decodeBase64(dataParam) : {};
+    };
+
+    const createSection = (key, value) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = "bg-gray-100 p-4 rounded-md";
+
+      const label = document.createElement('label');
+      label.className = "block text-sm font-semibold mb-1";
+      label.innerText = briefFields[key];
+
+      const textarea = document.createElement('div');
+      textarea.contentEditable = true;
+      textarea.className = "bg-white border border-gray-300 rounded p-2 min-h-[60px]";
+      textarea.dataset.key = key;
+      textarea.innerText = value || "";
+
+      wrapper.append(label, textarea);
+      return wrapper;
+    };
+
+    const populateBrief = () => {
+      const data = getBriefData();
+      const container = document.getElementById('briefContainer');
+      Object.keys(briefFields).forEach(key => {
+        container.appendChild(createSection(key, data[key]));
+      });
+    };
+
+    const getCurrentBrief = () => {
+      const edited = {};
+      document.querySelectorAll('[contenteditable]').forEach(el => {
+        edited[el.dataset.key] = el.innerText.trim();
+      });
+      return edited;
+    };
+
+    document.getElementById('copyAll').onclick = () => {
+      const fullText = Object.entries(getCurrentBrief())
+        .map(([k, v]) => `${briefFields[k]}:
+${v}
+`)
+        .join('\n');
+      navigator.clipboard.writeText(fullText);
+    };
+
+    document.getElementById('shareLink').onclick = () => {
+      const updated = getCurrentBrief();
+      const encoded = encodeBase64(updated);
+      const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
+      navigator.clipboard.writeText(url);
+      alert("Shareable link copied to clipboard!");
+    };
+
+    document.getElementById('downloadPDF').onclick = () => {
+      const brief = getCurrentBrief();
+      const pdfURL = "https://your-pdfmonkey-link.com/preview";
+      alert("PDF download not hooked yet. Replace this with your endpoint.");
+    };
+
+    populateBrief();
   </script>
 </body>
 </html>
